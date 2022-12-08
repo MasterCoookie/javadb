@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="js/ajax.js"></script>
+        <link rel="stylesheet" href="css/main.css" />
+    </head>
+    <body>
+        <h1>Kalkulator</h1>
+        <form action="calculator" method="GET">
+            <input type="text" id="arg1" name="arg1" />
+            <input type="text" id="arg2" name="arg2" />
+            <input type="submit" value="Oblicz" />
+        </form>
+        
+        <input type="button" id="calc" value="Oblicz" onclick="getResult('arg1', 'arg2', 'result');" />
+        <p id="result">Wynik: </p>
+    </body>
+</html>
