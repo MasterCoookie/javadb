@@ -8,6 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import pl.polsl.lab.model.Listing;
 import pl.polsl.lab.model.Tab;
 
@@ -26,20 +30,34 @@ public class ListingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        HttpSession session = request.getSession();
-        if(session.getAttribute("tabObject") == null) {
-            response.sendRedirect(request.getContextPath() + "/create");
-        } else {
-            this.tab = (Tab)session.getAttribute("tabObject");
-        }
+//        HttpSession session = request.getSession();
+//        if(session.getAttribute("tabObject") == null) {
+//            response.sendRedirect(request.getContextPath() + "/create");
+//        } else {
+//            this.tab = (Tab)session.getAttribute("tabObject");
+//        }
         String _index = request.getParameter("index");
         
         if(_index == null || _index.length() == 0){
-            response.sendError(response.SC_BAD_REQUEST, "Wymagane są dwa parametry!!!");
+            response.sendError(response.SC_BAD_REQUEST, "Niepoprawny index");
         } else {
             try{
                 int index = Integer.parseInt(_index);
-                this.listing = this.tab.getListings().get(index);
+                
+                var con = DriverManager.getConnection("jdbc:derby://localhost:1527/lab", "app", "app");
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT * FROM Listings WHERE id=" + _index);
+                while (rs.next()) {
+                    String title = rs.getString("title");
+                    float price = rs.getFloat("price");
+                    String author = rs.getString("authorUname");
+                    String authorContact = rs.getString("authorContact");
+                    String desc = rs.getString("descryption");
+                    boolean negotiable = rs.getBoolean("negotiable");
+                    this.listing = new Listing(title, price, desc, negotiable, author, authorContact);
+                }
+                rs.close();
+
                 PrintWriter out = response.getWriter();
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
