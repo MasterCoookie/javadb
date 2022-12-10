@@ -56,9 +56,10 @@ public class InsertServlet extends HttpServlet {
                 con = DriverManager.getConnection("jdbc:derby://localhost:1527/lab", "app", "app");
                 Statement statement = con.createStatement();
                 sql = "INSERT INTO Listings(tabid, title, price, descryption, negotiable, authoruname, authorcontact) VALUES(1, '"
-                        + _title + "'," + _price + ",'" + _desc + "'," + "on".equals(_negotiable) + ",'JK', '123'" +")";
+                        + _title + "'," + _price + ",'" + _desc + "'," + "on".equals(_negotiable) + ",'JK', '123')";
                 statement.executeUpdate(sql);
-                out.println(sql);
+//                out.println(sql);
+                response.sendRedirect(request.getContextPath() + "/tab?username=" + this.tab.getUsername() + "&contact=" + this.tab.getContact() + "&inserted=" + _title);
             }
                 catch(SQLException e){
                    
@@ -66,7 +67,7 @@ public class InsertServlet extends HttpServlet {
                    out.println(e.getMessage());
             }
             } catch(Exception ex) {
-//                response.sendRedirect(request.getContextPath() + "/create?username=" + this.tab.getUsername() + "&msg=Invalid%20tab%20parameters");
+                response.sendRedirect(request.getContextPath() + "/create?username=" + this.tab.getUsername() + "&msg=Invalid%20tab%20parameters");
             }
         }
         

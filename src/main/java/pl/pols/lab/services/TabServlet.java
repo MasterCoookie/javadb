@@ -6,7 +6,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -30,18 +29,27 @@ public class TabServlet extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        
-       
-        
-        
+        response.setContentType("text/html;charset=UTF-8");        
         
         String _username = request.getParameter("username");
         String _contact = request.getParameter("contact");
         String _inserted = request.getParameter("inserted");
         String sellingToday = "";
         this.tab = new Tab();
-        
+        try {
+            con = DriverManager.getConnection("jdbc:derby://localhost:1527/lab", "app", "app");
+            String sql = "CREATE TABLE tab (id int NOT NULL primary key, username varchar(50), contact  varchar(50))";
+            Statement statement = con.createStatement();
+            statement.executeUpdate(sql);
+            sql = "CREATE TABLE listings (listingid int NOT NULL, title varchar(50), price float(6), descryption varchar(255) ,negotiable bool, authoruname varchar(50), authorcontact varchar(50), id int primary key)";
+            Statement statement2 = con.createStatement();
+            statement2.executeUpdate(sql);
+        } catch(SQLException e) {
+            if(!e.getSQLState().equals("X0Y32")) {
+                response.sendError(response.SC_BAD_REQUEST, "db connection error!");
+//                response.sendError(response.SC_BAD_REQUEST, e.getSQLState());
+            }
+        }
         
         
         if(_username == null || _contact == null || _username.length() == 0 || _contact.length() == 0){
@@ -59,18 +67,7 @@ public class TabServlet extends HttpServlet {
             }
            
             PrintWriter out = response.getWriter();
-            
-//            HttpSession session = request.getSession();
-//            if(session.getAttribute("tabObject") == null) {
-//                this.tab = new Tab();
-//                this.tab.setUsername(_username);
-//                session.setAttribute("tabObject", this.tab);
-//            } else {
-//                this.tab = (Tab)session.getAttribute("tabObject");
-//            }
-            
              try {
-                con = DriverManager.getConnection("jdbc:derby://localhost:1527/lab", "app", "app");
                 Statement statement = con.createStatement();
                 ResultSet rs = statement.executeQuery("SELECT * FROM Listings WHERE tabid=1");
                 while (rs.next()) {
@@ -83,10 +80,11 @@ public class TabServlet extends HttpServlet {
                 rs.close();
             }
                 catch(SQLException e){
-                   out.println(e.getMessage());
-            }
+                   response.sendError(response.SC_BAD_REQUEST, "Internal db error!");
+                }
             
-            try{   
+            try {   
+                this.tab.setUsername(_username);
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
